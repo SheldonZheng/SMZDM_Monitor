@@ -29,8 +29,10 @@ def get_real_time_data():
 
     for string in dataa:
         title = string['article_title']
-        price = string['article_price']
-        link = string['article_link']
+        if 'article_price' in string.keys():
+            price = string['article_price']
+        if 'article_link' in string.keys():
+            link = string['article_link']
         page_url = string['article_url']
         result = {
             'title': title,
@@ -47,25 +49,33 @@ def read_local_file_keys():
         file_data = f.read()
         return file_data.split(sep=',')
 
-def send_mail(data):
+def send_mail(data,key,title):
     smtp_server = 'smtp.gmail.com'
     username = 'baiyeserver@gmail.com'
-    password = 'test'
+    password = 'password'
     to_addr = 'zhenghangtxdyr@gmail.com'
     msg = MIMEText(data, 'plain', 'utf-8')
     msg['From'] = 'SMZDM爬虫'
     msg['To'] = 'Target'
-    msg['Subject'] = Header('SMZDM关注商品出现提示', 'utf-8').encode()
-    server = smtplib.SMTP(smtp_server, 465)
+    msg['Subject'] = Header('SMZDM关注关键字;key: '+ key + ',title:' + title + '出现提示', 'utf-8').encode()
+    server = smtplib.SMTP(smtp_server, 587)
     server.set_debuglevel(1)
+    server.starttls()
     server.login(username, password)
     server.sendmail(username, [to_addr], msg.as_string())
     server.quit()
 
 
 if __name__ == '__main__':
-    send_mail('test')
-    # keys = read_local_file_keys()
+        keys = read_local_file_keys()
+        resultList = get_real_time_data()
+        for result in resultList:
+            for key in keys:
+                if result['title'].find(key) != -1:
+                    send_mail(str(result),key,result['title'])
+
+  #  send_mail('test')
+    #
     #
     # resultList = get_real_time_data()
     # for result in resultList:
