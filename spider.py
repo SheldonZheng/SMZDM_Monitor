@@ -6,6 +6,8 @@ from email.header import Header
 from email.mime.text import MIMEText
 from email.utils import parseaddr, formataddr
 import smtplib
+import hashlib
+import pymysql
 
 
 def get_real_time_data():
@@ -29,8 +31,10 @@ def get_real_time_data():
 
     for string in dataa:
         title = string['article_title']
+        price = ''
         if 'article_price' in string.keys():
             price = string['article_price']
+        link = ''
         if 'article_link' in string.keys():
             link = string['article_link']
         page_url = string['article_url']
@@ -45,15 +49,15 @@ def get_real_time_data():
     return resultList
 
 def read_local_file_keys():
-    with open('keys.txt','rt',encoding='utf-8') as f:
+    with open('your_keys','rt',encoding='utf-8') as f:
         file_data = f.read()
         return file_data.split(sep=',')
 
 def send_mail(data,key,title):
     smtp_server = 'smtp.gmail.com'
-    username = 'baiyeserver@gmail.com'
-    password = 'password'
-    to_addr = 'zhenghangtxdyr@gmail.com'
+    username = 'your_gmail_username'
+    password = 'your_gmail_password'
+    to_addr = 'target_email'
     msg = MIMEText(data, 'plain', 'utf-8')
     msg['From'] = 'SMZDM爬虫'
     msg['To'] = 'Target'
@@ -65,14 +69,66 @@ def send_mail(data,key,title):
     server.sendmail(username, [to_addr], msg.as_string())
     server.quit()
 
+def md5(str):
+    print(str)
+    m = hashlib.md5()
+    m.update(str.encode(encoding='utf-8'))
+    return m.hexdigest()
+
+
+def is_data_existed(result):
+    db = pymysql.connect('your_mysql_ip', 'your_username', 'your_password', 'your_database_name')
+    cursor = db.cursor()
+    tempResult = sorted(result.items(), key=lambda result: result[0])
+    sql = "SELECT * FROM smzdm_record where md5 = '%s'" % \
+          md5(str(tempResult))
+
+    print(md5(str(tempResult)))
+    try:
+        cursor.execute(sql)
+        print(cursor.rowcount)
+        if cursor.rowcount > 0 :
+            return False
+        else:
+            return True
+    except:
+        db.rollback()
+
+    db.close()
+
+def insert_data(result):
+    db = pymysql.connect('your_mysql_ip', 'your_username', 'your_password', 'your_database_name')
+    db.set_charset('utf8')
+    cursor = db.cursor()
+    tempResult = sorted(result.items(), key=lambda result: result[0])
+    sql = "INSERT INTO smzdm_record(title,price,link,page_url,md5) VALUES ('%s','%s','%s','%s','%s')" % \
+          (result['title'],result['price'],result['link'],result['page_url'],md5(str(tempResult)))
+
+    try:
+        cursor.execute(sql)
+        db.commit()
+        if cursor.rowcount > 0:
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
+        db.rollback()
+
+    db.close()
 
 if __name__ == '__main__':
+
         keys = read_local_file_keys()
         resultList = get_real_time_data()
+        print(resultList)
         for result in resultList:
             for key in keys:
                 if result['title'].find(key) != -1:
-                    send_mail(str(result),key,result['title'])
+                    if is_data_existed(result):
+                        send_mail(str(result), key, result['title'])
+                        insert_data(result)
+
 
   #  send_mail('test')
     #
