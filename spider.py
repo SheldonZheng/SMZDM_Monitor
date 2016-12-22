@@ -9,6 +9,18 @@ import smtplib
 import hashlib
 import pymysql
 
+database_ip_and_port = '???'
+database_name = '???'
+database_username = '???'
+database_password = '???'
+
+smtp_server_ip = '???'
+mail_username = '???'
+mail_password = '???'
+
+target_mail_address = '???'
+
+keys_file_path = '???'
 
 def get_real_time_data():
     c_time = int(time.time())
@@ -49,15 +61,15 @@ def get_real_time_data():
     return resultList
 
 def read_local_file_keys():
-    with open('your_keys','rt',encoding='utf-8') as f:
+    with open(keys_file_path,'rt',encoding='utf-8') as f:
         file_data = f.read()
         return file_data.split(sep=',')
 
 def send_mail(data,key,title):
-    smtp_server = 'smtp.gmail.com'
-    username = 'your_gmail_username'
-    password = 'your_gmail_password'
-    to_addr = 'target_email'
+    smtp_server = smtp_server_ip
+    username = mail_username
+    password = mail_password
+    to_addr = target_mail_address
     msg = MIMEText(data, 'plain', 'utf-8')
     msg['From'] = 'SMZDM爬虫'
     msg['To'] = 'Target'
@@ -77,7 +89,7 @@ def md5(str):
 
 
 def is_data_existed(result):
-    db = pymysql.connect('your_mysql_ip', 'your_username', 'your_password', 'your_database_name')
+    db = pymysql.connect(database_ip_and_port, database_username, database_password, database_name)
     cursor = db.cursor()
     tempResult = sorted(result.items(), key=lambda result: result[0])
     sql = "SELECT * FROM smzdm_record where md5 = '%s'" % \
@@ -97,7 +109,7 @@ def is_data_existed(result):
     db.close()
 
 def insert_data(result):
-    db = pymysql.connect('your_mysql_ip', 'your_username', 'your_password', 'your_database_name')
+    db = pymysql.connect(database_ip_and_port, database_username, database_password, database_name)
     db.set_charset('utf8')
     cursor = db.cursor()
     tempResult = sorted(result.items(), key=lambda result: result[0])
@@ -128,15 +140,4 @@ if __name__ == '__main__':
                     if is_data_existed(result):
                         send_mail(str(result), key, result['title'])
                         insert_data(result)
-
-
-  #  send_mail('test')
-    #
-    #
-    # resultList = get_real_time_data()
-    # for result in resultList:
-    #     for key in keys:
-    #         if result['title'].find(key) != -1 :
-    #             print(result)
-
 
