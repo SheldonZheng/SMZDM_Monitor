@@ -2,8 +2,13 @@
 支持python3+
 
 Usage:
+
 0.安装requests,pymysql以及其他所需的依赖包
+
 1.运行smzdm.sql
+
 2.更改spider.py中需要修改的数据,包括:数据库地址,数据库用户名密码,smtp地址,邮箱用户名,邮箱密码,目标邮箱地址
+
 3.添加自己的keys文件，以英文半角逗号","分割关键字,将keys文件的路径填入spider.py指定位置
+
 4.添加crontab 定时执行任务即可(建议一分钟执行一次)
