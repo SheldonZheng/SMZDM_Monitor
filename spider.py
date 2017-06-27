@@ -21,6 +21,7 @@ mail_password = '???'
 target_mail_address = '???'
 
 keys_file_path = '???'
+SOCK = '???'
 
 def get_real_time_data():
     c_time = int(time.time())
@@ -129,6 +130,11 @@ def insert_data(result):
 
     db.close()
 
+def push_wechat(data,key,title):
+    url = 'https://sc.ftqq.com/%s.send' % SOCK
+    payload = {'text' : 'SMZDM_Spider,key:%s,title:%s' % (key,title),'desp':data}
+    requests.post(url,data=payload,verify=False) 
+    
 if __name__ == '__main__':
 
         keys = read_local_file_keys()
@@ -139,5 +145,6 @@ if __name__ == '__main__':
                 if result['title'].find(key) != -1:
                     if is_data_existed(result):
                         send_mail(str(result), key, result['title'])
+                        push_wechat(str(result),key,result['title'])
                         insert_data(result)
 
