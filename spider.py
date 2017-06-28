@@ -21,7 +21,7 @@ mail_password = '???'
 target_mail_address = '???'
 
 keys_file_path = '???'
-SOCK = '???'
+sock = '???'
 
 def get_real_time_data():
     c_time = int(time.time())
@@ -131,7 +131,7 @@ def insert_data(result):
     db.close()
 
 def push_wechat(data,key,title):
-    url = 'https://sc.ftqq.com/%s.send' % SOCK
+    url = 'https://sc.ftqq.com/%s.send' % sock
     payload = {'text' : 'SMZDM_Spider,key:%s,title:%s' % (key,title),'desp':data}
     requests.post(url,data=payload,verify=False) 
     
