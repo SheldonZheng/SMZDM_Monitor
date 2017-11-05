@@ -32,13 +32,14 @@ def get_real_time_data():
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.143 Safari/537.36'
     }
 
-    url = 'http://www.smzdm.com/json_more?timesort=' + str(c_time)
+    url = 'https://www.smzdm.com/homepage/json_more?timesort=' + str(c_time) + '&p=1'
     r = requests.get(url=url, headers=headers)
 
     # data = r.text.encode('utf-8').decode('unicode_escape')
     data = r.text
 
     dataa = json.loads(data)
+    dataa = dataa['data']
 
     resultList = []
 
