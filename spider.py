@@ -44,6 +44,9 @@ def get_real_time_data():
     resultList = []
 
     for string in dataa:
+         if string.__contains__('type'):
+            if string['type'] == 'ad':
+                continue
         title = string['article_title']
         price = ''
         if 'article_price' in string.keys():
